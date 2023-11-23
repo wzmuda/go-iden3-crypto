@@ -34,12 +34,7 @@ func (h *hasher) Sum(b []byte) []byte {
 	var inpBI [NROUNDSF]uint64
 	var capBI [CAPLEN]uint64
 
-	// Initialize capBI with zeros and inpBI with first NROUNDSF*8 bytes of b
-	for i := 0; i < CAPLEN; i++ {
-		capBI[i] = 0
-	}
-
-	requiredLen := NROUNDSF * 8
+	requiredLen := (NROUNDSF + CAPLEN) * 8
 	currentLen := h.buf.Len()
 	extraBytes := currentLen % requiredLen
 
@@ -49,9 +44,12 @@ func (h *hasher) Sum(b []byte) []byte {
 		h.buf.Write(padding)
 	}
 
-	// Convert bytes to uint64 and fill the array
+	// Convert bytes to uint64 and fill the input arrays
 	for i := 0; i < NROUNDSF; i++ {
 		inpBI[i] = binary.BigEndian.Uint64(h.buf.Next(8))
+	}
+	for i := 0; i < CAPLEN; i++ {
+		capBI[i] = binary.BigEndian.Uint64(h.buf.Next(8))
 	}
 
 	capBI, _ = Hash(inpBI, capBI)
