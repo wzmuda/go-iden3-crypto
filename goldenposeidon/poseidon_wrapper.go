@@ -54,8 +54,10 @@ func (h *hasher) Sum(b []byte) []byte {
 		inpBI[i] = binary.BigEndian.Uint64(h.buf.Next(8))
 	}
 
+	capBI, _ = Hash(inpBI, capBI)
+
+	// Repeat the sequence if we can read more NROUNDSF*8-byte-chunks from the buffer into inpBI
 	for h.buf.Len() >= requiredLen {
-		// Read NROUNDSF * 8 bytes from the buffer into inpBI
 		for i := 0; i < NROUNDSF; i++ {
 			inpBI[i] = binary.BigEndian.Uint64(h.buf.Next(8))
 		}
